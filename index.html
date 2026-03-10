@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>單字翻牌記憶遊戲</title>
+  
+  <!-- 引入 React 與 ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- 引入 Babel 來編譯 JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- 引入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .preserve-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .perspective-1000 { perspective: 1000px; }
+  </style>
+</head>
+<body class="bg-indigo-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // 替換為圖片中的 45 個新單字
+    const wordDatabase = [
+      { id: 1, en: 'pass', zh: '傳遞' },
+      { id: 2, en: 'throw', zh: '丟；投擲' },
+      { id: 3, en: 'point', zh: '得分' },
+      { id: 4, en: 'win', zh: '贏；獲勝' },
+      { id: 5, en: 'group', zh: '團體' },
+      { id: 6, en: 'grade', zh: '成績' },
+      { id: 7, en: 'fail', zh: '考不及格；失敗' },
+      { id: 8, en: 'test', zh: '考試' },
+      { id: 9, en: 'afraid', zh: '害怕的；擔憂的' },
+      { id: 10, en: 'smart', zh: '聰明的' },
+      { id: 11, en: 'begin', zh: '開始' },
+      { id: 12, en: 'meeting', zh: '會議；會面' },
+      { id: 13, en: 'simple', zh: '簡單的' },
+      { id: 14, en: 'expect', zh: '預計；期望' },
+      { id: 15, en: 'mistake', zh: '錯誤' },
+      { id: 16, en: 'angle', zh: '立場；角度' },
+      { id: 17, en: 'allow', zh: '允許' },
+      { id: 18, en: 'laugh', zh: '笑；笑聲' },
+      { id: 19, en: 'bring', zh: '帶來；攜帶' },
+      { id: 20, en: 'honest', zh: '誠實的；可信的' },
+      { id: 21, en: 'lead to', zh: '導致' },
+      { id: 22, en: 'push', zh: '迫使；推動' },
+      { id: 23, en: 'excellent', zh: '優秀的；極佳的' },
+      { id: 24, en: 'be able to', zh: '能夠' },
+      { id: 25, en: 'define', zh: '下定義；界定' },
+      { id: 26, en: 'come on', zh: '快點；少來了' },
+      { id: 27, en: 'excuse', zh: '藉口；理由' },
+      { id: 28, en: 'around the corner', zh: '即將來臨；在附近' },
+      { id: 29, en: 'hold back', zh: '阻礙' },
+      { id: 30, en: 'count... in', zh: '算...參加一份' },
+      { id: 31, en: 'keep in mind', zh: '記住' },
+      { id: 32, en: 'matter', zh: '要緊；重要' },
+      { id: 33, en: 'picture', zh: '想像' },
+      { id: 34, en: 'as for', zh: '至於' },
+      { id: 35, en: 'to the full', zh: '盡可能' },
+      { id: 36, en: 'fair', zh: '展覽會' },
+      { id: 37, en: 'creative', zh: '有創意的' },
+      { id: 38, en: 'stereotype', zh: '刻板印象；對...有偏見' },
+      { id: 39, en: 'judgement', zh: '判斷' },
+      { id: 40, en: 'respect', zh: '尊重' },
+      { id: 41, en: 'gender', zh: '性別' },
+      { id: 42, en: 'self', zh: '自我' },
+      { id: 43, en: 'talent', zh: '人才；天分' },
+      { id: 44, en: 'designer', zh: '設計師' },
+      { id: 45, en: 'record', zh: '紀錄；記載' }
+    ];
+
+    function App() {
+      const [cards, setCards] = useState([]);
+      const [flippedIndices, setFlippedIndices] = useState([]);
+      const [matchedIds, setMatchedIds] = useState([]);
+      const [attempts, setAttempts] = useState(0);
+      const [pairCount, setPairCount] = useState(8); 
+      const [isGameWon, setIsGameWon] = useState(false);
+      const [isProcessing, setIsProcessing] = useState(false);
+      const [timeElapsed, setTimeElapsed] = useState(0);
+      const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+      // 計時器 Effect
+      useEffect(() => {
+        let interval;
+        if (isTimerRunning) {
+          interval = setInterval(() => {
+            setTimeElapsed(prev => prev + 1);
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [isTimerRunning]);
+
+      // 時間格式化
+      const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+      };
+
+      // 發音功能：使用瀏覽器內建的 Web Speech API
+      const speakWord = (text) => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel(); // 停止正在播放的聲音，避免連點時聲音重疊
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-US'; // 設定為美式發音
+          utterance.rate = 0.9; // 稍微放慢語速，讓學生聽得更清楚
+          
+          // 如果句子中有 '...' (如 count... in)，先把它濾掉讓發音更自然
+          utterance.text = text.replace('...', ' '); 
+          window.speechSynthesis.speak(utterance);
+        }
+      };
+
+      const shuffleArray = (array) => {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+      };
+
+      const initializeGame = () => {
+        const shuffledDB = shuffleArray(wordDatabase);
+        const selectedPairs = shuffledDB.slice(0, pairCount);
+
+        let gameCards = [];
+        selectedPairs.forEach(pair => {
+          gameCards.push({ uniqueId: `${pair.id}-en`, pairId: pair.id, text: pair.en, type: 'en' });
+          gameCards.push({ uniqueId: `${pair.id}-zh`, pairId: pair.id, text: pair.zh, type: 'zh' });
+        });
+
+        gameCards = shuffleArray(gameCards);
+        setCards(gameCards);
+        setFlippedIndices([]);
+        setMatchedIds([]);
+        setAttempts(0);
+        setIsGameWon(false);
+        setIsProcessing(false);
+        setTimeElapsed(0);
+        setIsTimerRunning(false);
+      };
+
+      useEffect(() => {
+        initializeGame();
+      }, [pairCount]);
+
+      const handleCardClick = (index) => {
+        if (
+          isProcessing ||
+          flippedIndices.includes(index) ||
+          matchedIds.includes(cards[index].pairId)
+        ) {
+          return;
+        }
+
+        // 開始計時
+        if (!isTimerRunning) {
+          setIsTimerRunning(true);
+        }
+
+        // 如果點擊的是英文卡片，就自動念出單字
+        if (cards[index].type === 'en') {
+          speakWord(cards[index].text);
+        }
+
+        const newFlippedIndices = [...flippedIndices, index];
+        setFlippedIndices(newFlippedIndices);
+
+        if (newFlippedIndices.length === 2) {
+          setIsProcessing(true);
+          setAttempts(prev => prev + 1);
+
+          const firstCard = cards[newFlippedIndices[0]];
+          const secondCard = cards[newFlippedIndices[1]];
+
+          if (firstCard.pairId === secondCard.pairId) {
+            // 配對成功：如果這是最後一對，先停止計時
+            if (matchedIds.length + 1 === pairCount) {
+              setIsTimerRunning(false);
+            }
+            
+            // 停留 0.8 秒（800毫秒）後再讓卡片消失
+            setTimeout(() => {
+              setMatchedIds(prev => {
+                const newMatched = [...prev, firstCard.pairId];
+                if (newMatched.length === pairCount) {
+                  setTimeout(() => setIsGameWon(true), 500);
+                }
+                return newMatched;
+              });
+              setFlippedIndices([]);
+              setIsProcessing(false);
+            }, 800);
+          } else {
+            setTimeout(() => {
+              setFlippedIndices([]);
+              setIsProcessing(false);
+            }, 800);
+          }
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col items-center py-8 px-4 text-gray-800">
+          <div className="max-w-4xl w-full">
+            
+            {/* Header 區塊 */}
+            <div className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-indigo-600 mb-2 flex items-center">
+                  <svg className="mr-2 text-yellow-500" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                  單字記憶翻翻牌
+                </h1>
+                <p className="text-gray-500">找出正確的中英文配對！</p>
+              </div>
+              
+              <div className="flex items-center gap-6 mt-4 md:mt-0 text-lg">
+                <div className="text-center">
+                  <span className="block text-sm text-gray-400 font-semibold uppercase tracking-wider">花費時間</span>
+                  <span className="font-bold text-2xl text-blue-500">{formatTime(timeElapsed)}</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-sm text-gray-400 font-semibold uppercase tracking-wider">翻牌次數</span>
+                  <span className="font-bold text-2xl text-indigo-500">{attempts}</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-sm text-gray-400 font-semibold uppercase tracking-wider">已配對</span>
+                  <span className="font-bold text-2xl text-green-500">{matchedIds.length} / {pairCount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 控制面板 */}
+            <div className="flex flex-wrap gap-4 mb-6 justify-center">
+              <button 
+                onClick={initializeGame}
+                className="flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-all shadow-md active:scale-95 font-medium"
+              >
+                <svg className="mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                重新開始
+              </button>
+              
+              <div className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm">
+                <svg className="text-gray-400 mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <label className="text-sm font-medium mr-2">卡片數量:</label>
+                <select 
+                  value={pairCount} 
+                  onChange={(e) => setPairCount(Number(e.target.value))}
+                  className="bg-gray-100 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-indigo-300 transition-shadow"
+                >
+                  <option value={6}>12 張 (簡單)</option>
+                  <option value={8}>16 張 (適中)</option>
+                  <option value={10}>20 張 (挑戰)</option>
+                  <option value={12}>24 張 (困難)</option>
+                  <option value={16}>32 張 (極難)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 遊戲區塊 */}
+            <div className={`grid gap-2 md:gap-3 mx-auto`} 
+                 style={{ 
+                   gridTemplateColumns: (pairCount === 12 || pairCount === 16) ? 'repeat(4, 1fr)' : `repeat(auto-fit, minmax(${pairCount > 10 ? '100px' : '120px'}, 1fr))`,
+                   maxWidth: (pairCount === 12 || pairCount === 16) ? '600px' : (pairCount > 10 ? '800px' : '600px')
+                 }}>
+              {cards.map((card, index) => {
+                const isFlipped = flippedIndices.includes(index);
+                const isMatched = matchedIds.includes(card.pairId);
+                
+                // 處理片語換行 (透過空白字元分割)
+                const textParts = card.text.split(' ');
+                
+                // 依照卡片數量和文字長度決定字體大小
+                const maxWordLen = Math.max(...textParts.map(w => w.length));
+                let fontSizeClass = '';
+                
+                if (pairCount >= 12) { // 24 張或 32 張模式
+                  if (maxWordLen > 8) {
+                    fontSizeClass = 'text-sm sm:text-base md:text-xl';
+                  } else {
+                    fontSizeClass = 'text-base sm:text-xl md:text-2xl';
+                  }
+                } else { // 12 張、16 張、20 張模式
+                  if (maxWordLen > 8) {
+                    fontSizeClass = 'text-lg sm:text-xl md:text-2xl';
+                  } else {
+                    fontSizeClass = 'text-xl sm:text-2xl md:text-3xl';
+                  }
+                }
+                
+                return (
+                  <div 
+                    key={card.uniqueId}
+                    onClick={() => handleCardClick(index)}
+                    className={`relative w-full aspect-[4/3] md:aspect-square cursor-pointer transition-all duration-300 transform perspective-1000 ${isMatched ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100'}`}
+                  >
+                    <div 
+                      className="w-full h-full relative preserve-3d transition-transform duration-500"
+                      style={{ transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
+                    >
+                      {/* 卡片背面 */}
+                      <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl shadow-md border-2 border-white/20 flex items-center justify-center hover:shadow-lg transition-shadow">
+                      </div>
+                      
+                      {/* 卡片正面 */}
+                      <div 
+                        className={`absolute w-full h-full backface-hidden rounded-xl shadow-md border-2 flex flex-col items-center justify-center p-1 sm:p-2 text-center
+                          ${card.type === 'en' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-orange-50 border-orange-200 text-orange-700'}`}
+                        style={{ transform: 'rotateY(180deg)' }}
+                      >
+                        <div className={`w-full ${fontSizeClass} font-bold flex flex-col items-center justify-center leading-tight`}>
+                          {textParts.map((part, i) => (
+                            <span key={i} className="block w-full truncate whitespace-normal break-words">{part}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 過關畫面 */}
+            {isGameWon && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition-opacity">
+                <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100 transition-transform">
+                  <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="text-yellow-500" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-gray-800 mb-2">太棒了！</h2>
+                  <p className="text-gray-600 mb-6 text-lg">
+                    你只用了 <strong className="text-indigo-600 text-2xl">{attempts}</strong> 次<br/>
+                    花費了 <strong className="text-indigo-600 text-2xl">{formatTime(timeElapsed)}</strong><br/>
+                    就成功配對所有單字！
+                  </p>
+                  <button 
+                    onClick={initializeGame}
+                    className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+                  >
+                    再來一局
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
