@@ -26,95 +26,95 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
+    // 替換為圖片中的 Unit 1 與 Unit 2 單字
     const wordDatabase = [
-      // Unit 5
-      { id: 1, en: 'although', zh: '雖然' },
-      { id: 2, en: 'matter', zh: '問題；事件' },
-      { id: 3, en: 'sore throat', zh: '喉嚨痛' },
-      { id: 4, en: 'explain', zh: '解釋' },
-      { id: 5, en: 'cough', zh: '咳嗽' },
-      { id: 6, en: 'probably', zh: '很可能；大概' },
-      { id: 7, en: 'take care of', zh: '照顧' },
-      { id: 8, en: 'noon', zh: '中午' },
-      { id: 9, en: 'both', zh: '兩者（都）' },
-      { id: 10, en: 'sick', zh: '生病的' },
-      { id: 11, en: 'medicine', zh: '藥' },
-      { id: 12, en: 'honey', zh: '蜂蜜' },
-      { id: 13, en: 'lemon', zh: '檸檬' },
-      { id: 14, en: 'useful', zh: '有用的' },
-      { id: 15, en: 'head', zh: '頭' },
-      { id: 16, en: 'headache', zh: '頭痛' },
-      { id: 17, en: 'stomachache', zh: '胃痛' },
-      { id: 18, en: 'fever', zh: '發燒' },
-      { id: 19, en: 'runny nose', zh: '流鼻水' },
-      { id: 20, en: 'knee', zh: '膝蓋' },
-      { id: 21, en: 'nail', zh: '指甲' },
-      { id: 22, en: 'finger', zh: '手指' },
-      { id: 23, en: 'neck', zh: '脖子' },
-      { id: 24, en: 'shoulder', zh: '肩膀' },
-      { id: 25, en: 'common', zh: '常見的；共同的' },
-      { id: 26, en: 'actually', zh: '實際上；事實上' },
-      { id: 27, en: 'helpful', zh: '有幫助的' },
-      { id: 28, en: 'root', zh: '根' },
-      { id: 29, en: 'reason', zh: '原因；理由' },
-      { id: 30, en: 'stand', zh: '攤位' },
-      { id: 31, en: 'feel like', zh: '想要' },
-      { id: 32, en: 'cold', zh: '感冒' },
-      { id: 33, en: 'well', zh: '健康的' },
-      { id: 34, en: 'must', zh: '必要的事物' },
-      { id: 35, en: 'under the weather', zh: '身體不舒服' },
-      { id: 36, en: 'treat', zh: '治療' },
-      { id: 37, en: 'recipe', zh: '食譜' },
-      { id: 38, en: 'culture', zh: '文化' },
-      { id: 39, en: 'garlic', zh: '大蒜' },
-      { id: 40, en: 'ginger', zh: '薑' },
+      // ----- Unit 1 -----
+      { id: 1, en: 'yet', zh: '還(沒)' },
+      { id: 2, en: 'already', zh: '已經' },
+      { id: 3, en: 'diet', zh: '節食；飲食' },
+      { id: 4, en: 'since', zh: '自從' },
+      { id: 5, en: 'photo', zh: '照片' },
+      { id: 6, en: 'crazy', zh: '荒唐的；瘋狂的' },
+      { id: 7, en: 'as... as possible', zh: '盡可能地...' },
+      { id: 8, en: 'slim', zh: '苗條的；微小的' },
+      { id: 9, en: 'tip', zh: '訣竅' },
+      { id: 10, en: 'type', zh: '類型' },
+      { id: 11, en: 'ever', zh: '曾經' },
+      { id: 12, en: 'habit', zh: '習慣' },
+      { id: 13, en: 'take action', zh: '採取行動' },
+      { id: 14, en: 'be all ears', zh: '洗耳恭聽' },
+      { id: 15, en: 'at least', zh: '至少' },
+      { id: 16, en: 'You got it.', zh: '沒錯。' },
+      { id: 17, en: 'choice', zh: '選擇' },
+      { id: 18, en: 'gym', zh: '健身房；體育館' },
+      { id: 19, en: 'abroad', zh: '到國外' },
+      { id: 20, en: 'cheat', zh: '作弊；欺騙' },
+      { id: 21, en: 'copy', zh: '抄襲；複製' },
+      { id: 22, en: 'race', zh: '速度競賽' },
+      { id: 23, en: 'stay in shape', zh: '保持健康' },
+      { id: 24, en: 'letter', zh: '信' },
+      { id: 25, en: 'teenager', zh: '青少年' },
+      { id: 26, en: 'senior high school', zh: '高中' },
+      { id: 27, en: 'understand', zh: '瞭解' },
+      { id: 28, en: 'drum', zh: '鼓' },
+      { id: 29, en: 'joy', zh: '樂趣；喜悅' },
+      { id: 30, en: 'pop', zh: '流行音樂' },
+      { id: 31, en: 'lately', zh: '最近' },
+      { id: 32, en: 'angry', zh: '生氣的' },
+      { id: 33, en: 'serious', zh: '嚴重的' },
+      { id: 34, en: 'interest', zh: '興趣；使感興趣' },
+      { id: 35, en: 'garbage', zh: '垃圾' },
+      { id: 36, en: 'unhappy', zh: '不快樂的' },
+      { id: 37, en: 'wish', zh: '祝福' },
+      { id: 38, en: 'envelope', zh: '信封' },
+      { id: 39, en: 'stamp', zh: '郵票' },
+      { id: 40, en: 'star', zh: '明星' },
+      { id: 41, en: 'call', zh: '稱呼' },
+      { id: 42, en: 'talk... into', zh: '說服（某人）做...' },
 
-      // Unit 6
-      { id: 41, en: 'pass', zh: '傳遞' },
-      { id: 42, en: 'throw', zh: '丟；投擲' },
-      { id: 43, en: 'point', zh: '得分' },
-      { id: 44, en: 'win', zh: '贏；獲勝' },
-      { id: 45, en: 'group', zh: '團體' },
-      { id: 46, en: 'grade', zh: '成績' },
-      { id: 47, en: 'fail', zh: '考不及格；失敗' },
-      { id: 48, en: 'test', zh: '考試' },
-      { id: 49, en: 'afraid', zh: '害怕的；擔憂的' },
-      { id: 50, en: 'smart', zh: '聰明的' },
-      { id: 51, en: 'begin', zh: '開始' },
-      { id: 52, en: 'meeting', zh: '會議；會面' },
-      { id: 53, en: 'simple', zh: '簡單的' },
-      { id: 54, en: 'expect', zh: '預計；期望' },
-      { id: 55, en: 'mistake', zh: '錯誤' },
-      { id: 56, en: 'angle', zh: '立場；角度' },
-      { id: 57, en: 'allow', zh: '允許' },
-      { id: 58, en: 'laugh', zh: '笑；笑聲' },
-      { id: 59, en: 'bring', zh: '帶來；攜帶' },
-      { id: 60, en: 'honest', zh: '誠實的；可信的' },
-      { id: 61, en: 'lead to', zh: '導致' },
-      { id: 62, en: 'push', zh: '迫使；推動' },
-      { id: 63, en: 'excellent', zh: '優秀的；極佳的' },
-      { id: 64, en: 'be able to', zh: '能夠' },
-      { id: 65, en: 'define', zh: '下定義；界定' },
-      { id: 66, en: 'come on', zh: '快點；少來了' },
-      { id: 67, en: 'excuse', zh: '藉口；理由' },
-      { id: 68, en: 'around the corner', zh: '即將來臨；在附近' },
-      { id: 69, en: 'hold back', zh: '阻礙' },
-      { id: 70, en: 'count... in', zh: '算...參加一份' },
-      { id: 71, en: 'keep in mind', zh: '記住' },
-      { id: 72, en: 'matter', zh: '要緊；重要' },
-      { id: 73, en: 'picture', zh: '想像' },
-      { id: 74, en: 'as for', zh: '至於' },
-      { id: 75, en: 'to the full', zh: '盡可能' },
-      { id: 76, en: 'fair', zh: '展覽會' },
-      { id: 77, en: 'creative', zh: '有創意的' },
-      { id: 78, en: 'stereotype', zh: '刻板印象；對...有偏見' },
-      { id: 79, en: 'judgement', zh: '判斷' },
-      { id: 80, en: 'respect', zh: '尊重' },
-      { id: 81, en: 'gender', zh: '性別' },
-      { id: 82, en: 'self', zh: '自我' },
-      { id: 83, en: 'talent', zh: '人才；天分' },
-      { id: 84, en: 'designer', zh: '設計師' },
-      { id: 85, en: 'record', zh: '紀錄；記載' }
+      // ----- Unit 2 -----
+      { id: 43, en: 'actor', zh: '演員' },
+      { id: 44, en: 'act', zh: '表演' },
+      { id: 45, en: 'touch', zh: '觸動；碰觸' },
+      { id: 46, en: 'heart', zh: '心；心臟' },
+      { id: 47, en: 'surprise', zh: '(使) 驚訝' },
+      { id: 48, en: 'bored', zh: '感到無聊的' },
+      { id: 49, en: 'hard-working', zh: '勤奮的' },
+      { id: 50, en: 'guess', zh: '猜測' },
+      { id: 51, en: 'several', zh: '幾個的' },
+      { id: 52, en: 'surprised', zh: '感到驚訝的' },
+      { id: 53, en: 'exciting', zh: '令人興奮的；刺激的' },
+      { id: 54, en: 'ghost', zh: '鬼' },
+      { id: 55, en: 'castle', zh: '城堡' },
+      { id: 56, en: 'surprising', zh: '令人驚訝的' },
+      { id: 57, en: 'interested', zh: '感興趣的' },
+      { id: 58, en: 'boring', zh: '無聊的' },
+      { id: 59, en: 'download', zh: '下載' },
+      { id: 60, en: 'Internet', zh: '網路' },
+      { id: 61, en: 'set', zh: '建立；樹立' },
+      { id: 62, en: 'excited', zh: '感到興奮的' },
+      { id: 63, en: 'ticket', zh: '票' },
+      { id: 64, en: 'online', zh: '在網上；線上的' },
+      { id: 65, en: 'proud', zh: '自豪的；驕傲的' },
+      { id: 66, en: "I'll pass.", zh: '不用了。' },
+      { id: 67, en: 'book', zh: '預訂；預約' },
+      { id: 68, en: 'actress', zh: '女演員' },
+      { id: 69, en: 'towel', zh: '毛巾' },
+      { id: 70, en: 'comb', zh: '梳子；梳理' },
+      { id: 71, en: 'bat', zh: '蝙蝠' },
+      { id: 72, en: 'lie', zh: '謊言；說謊' },
+      { id: 73, en: 'fake', zh: '假的；偽造的' },
+      { id: 74, en: 'newspaper', zh: '報紙' },
+      { id: 75, en: 'nobody', zh: '無人' },
+      { id: 76, en: 'anybody', zh: '任何人' },
+      { id: 77, en: 'piece', zh: '(一) 則；片；張' },
+      { id: 78, en: 'dig', zh: '挖掘；尋找' },
+      { id: 79, en: 'sentence', zh: '句子' },
+      { id: 80, en: 'spell', zh: '拼字' },
+      { id: 81, en: 'trick', zh: '騙；詭計' },
+      { id: 82, en: 'post', zh: '貼文；張貼' },
+      { id: 83, en: 'right away', zh: '立刻；馬上' },
+      { id: 84, en: 'hit', zh: '點擊數' }
     ];
 
     function App() {
@@ -154,8 +154,8 @@
           utterance.lang = 'en-US'; // 設定為美式發音
           utterance.rate = 0.9; // 稍微放慢語速，讓學生聽得更清楚
           
-          // 如果句子中有 '...' (如 count... in)，先把它濾掉讓發音更自然
-          utterance.text = text.replace('...', ' '); 
+          // 如果句子中有 '...' (如 talk... into)，先把它濾掉讓發音更自然
+          utterance.text = text.replace(/\.\.\./g, ' '); 
           window.speechSynthesis.speak(utterance);
         }
       };
@@ -229,7 +229,7 @@
               setIsTimerRunning(false);
             }
             
-            // 停留 0.8 秒（800毫秒）後再讓卡片消失
+            // 停留 0.5 秒（500毫秒）後再讓卡片消失
             setTimeout(() => {
               setMatchedIds(prev => {
                 const newMatched = [...prev, firstCard.pairId];
@@ -240,12 +240,13 @@
               });
               setFlippedIndices([]);
               setIsProcessing(false);
-            }, 800);
+            }, 500);
           } else {
+            // 配對失敗：停留 0.5 秒（500毫秒）後翻回去
             setTimeout(() => {
               setFlippedIndices([]);
               setIsProcessing(false);
-            }, 800);
+            }, 500);
           }
         }
       };
@@ -326,13 +327,13 @@
                 
                 if (pairCount >= 12) { // 24 張或 32 張模式
                   if (maxWordLen > 8) {
-                    fontSizeClass = 'text-sm sm:text-base md:text-xl';
+                    fontSizeClass = 'text-sm sm:text-base md:text-lg';
                   } else {
-                    fontSizeClass = 'text-base sm:text-xl md:text-2xl';
+                    fontSizeClass = 'text-base sm:text-lg md:text-xl';
                   }
                 } else { // 12 張、16 張、20 張模式
                   if (maxWordLen > 8) {
-                    fontSizeClass = 'text-lg sm:text-xl md:text-2xl';
+                    fontSizeClass = 'text-base sm:text-xl md:text-2xl';
                   } else {
                     fontSizeClass = 'text-xl sm:text-2xl md:text-3xl';
                   }
